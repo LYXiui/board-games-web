@@ -1,0 +1,44 @@
+{
+  "name": "board-games-web",
+  "description": "五棋種人機對弈網頁：EZChess、西洋棋、将棋、軍儀、軍棋",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LYXiui/board-games-web.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "dev:safe": "vite --port 5199 --strictPort",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "serve dist -s -l tcp://0.0.0.0:4188",
+    "desktop": "vite build && serve dist -s -l tcp://0.0.0.0:4188",
+    "export-repos": "node scripts/export-repos.mjs"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@tailwindcss/postcss": "^4.2.1",
+    "@tailwindcss/vite": "^4.3.0",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "autoprefixer": "^10.4.27",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "postcss": "^8.5.8",
+    "serve": "^14.2.4",
+    "tailwindcss": "^4.2.1",
+    "vite": "^8.0.0-beta.13"
+  },
+  "overrides": {
+    "vite": "^8.0.0-beta.13"
+  }
+}

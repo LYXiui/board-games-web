@@ -13,6 +13,10 @@ import {
 } from './logic.js';
 import { findBestMove } from './ai.js';
 import ShogiRulesPanel from './ShogiRulesPanel.jsx';
+import ShogiPiece from './ShogiPiece.jsx';
+
+const FILE_NUM = ['9', '8', '7', '6', '5', '4', '3', '2', '1'];
+const RANK_KANJI = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
 
 function sameMove(a, b) {
   if (!!a.drop !== !!b.drop) return false;
@@ -44,13 +48,13 @@ function Komadai({ owner, hands, selectedType, onSelect, disabled }) {
           type="button"
           disabled={disabled}
           onClick={() => onSelect(selectedType === type ? null : type)}
-          className={`relative min-w-[2.25rem] h-9 px-1 rounded border font-serif text-lg leading-none transition-colors ${
+          className={`relative min-w-[2.5rem] h-10 px-0.5 rounded border transition-colors flex items-center justify-center ${
             selectedType === type
-              ? 'bg-[#8b2500]/40 border-[#c44] text-[#ffe8d0] ring-2 ring-[#c44]/60'
-              : 'bg-[#f5ecd7] border-[#6b4423] text-[#2a1810] hover:bg-[#fff8ee]'
+              ? 'bg-[#8b2500]/40 border-[#c44] ring-2 ring-[#c44]/60'
+              : 'bg-[#c9a66b]/30 border-[#6b4423] hover:bg-[#c9a66b]/50'
           } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
         >
-          {pieceLabel({ type, owner, promoted: false })}
+          <ShogiPiece piece={{ type, owner, promoted: false }} size="sm" />
           {counts[type] > 1 && (
             <span className="absolute -top-1 -right-1 text-[10px] bg-[#8b2500] text-white rounded-full w-4 h-4 flex items-center justify-center">
               {counts[type]}
@@ -338,7 +342,7 @@ export default function ShogiApp() {
             <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 border-b border-[#6b4423] pb-4">
               <div>
                 <h1 className="text-2xl font-serif tracking-tight text-[#f5ecd7]">将棋</h1>
-                <p className="text-sm text-[#c4a574] mt-1">人機対弈 · 標準 9×9 · Alpha-Beta AI</p>
+                <p className="text-sm text-[#c4a574] mt-1">人機対弈 · 標準 9×9 · 木製駒樣式</p>
               </div>
               {phase === 'thinking' && (
                 <div className="font-serif text-[#d4a574] animate-pulse">AI 思考中…</div>
@@ -439,14 +443,37 @@ export default function ShogiApp() {
                 )}
 
                 <div className="flex flex-col sm:flex-row gap-3 items-start">
-                  <div className="order-2 sm:order-1 flex-1 w-full max-w-[min(100%,28rem)] mx-auto">
-                    <div
-                      className="inline-grid gap-0 border-4 border-[#5c3d1e] rounded shadow-lg"
-                      style={{
-                        gridTemplateColumns: `repeat(${SIZE}, minmax(0, 1fr))`,
-                        background: '#c9a66b',
-                      }}
-                    >
+                  <div className="order-2 sm:order-1 flex-1 w-full max-w-[min(100%,30rem)] mx-auto">
+                    <div className="inline-block p-2 rounded-lg bg-[#5c3d1e] border-2 border-[#4a3020] shadow-xl">
+                      <div
+                        className="grid gap-0 mb-1"
+                        style={{ gridTemplateColumns: '1.25rem repeat(9, 1fr)' }}
+                      >
+                        <span />
+                        {FILE_NUM.map((n) => (
+                          <span key={n} className="text-center text-[10px] text-[#8b6914] font-serif">
+                            {n}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="flex gap-0">
+                        <div className="flex flex-col w-5 shrink-0">
+                          {Array.from({ length: SIZE }, (_, i) => (
+                            <span
+                              key={i}
+                              className="aspect-square flex items-center justify-center text-[10px] text-[#8b6914] font-serif"
+                            >
+                              {RANK_KANJI[boardFlipped ? SIZE - 1 - i : i]}
+                            </span>
+                          ))}
+                        </div>
+                        <div
+                          className="inline-grid gap-0 border-4 border-[#5c3d1e] rounded shadow-inner flex-1"
+                          style={{
+                            gridTemplateColumns: `repeat(${SIZE}, minmax(0, 1fr))`,
+                            background: 'linear-gradient(135deg, #d4b06a 0%, #c9a66b 50%, #b8956a 100%)',
+                          }}
+                        >
                       {Array.from({ length: SIZE }, (_, dr) =>
                         Array.from({ length: SIZE }, (_, dc) => {
                           const r = boardFlipped ? SIZE - 1 - dr : dr;
@@ -473,8 +500,8 @@ export default function ShogiApp() {
                               type="button"
                               onClick={() => handleCellClick(dr, dc)}
                               disabled={phase === 'ended' || phase === 'thinking'}
-                              className={`relative aspect-square flex items-center justify-center border border-[#8b6914]/50 text-2xl sm:text-3xl font-serif select-none transition-colors ${
-                                (dr + dc) % 2 === 0 ? 'bg-[#e8c98a]' : 'bg-[#d4b06a]'
+                              className={`relative aspect-square flex items-center justify-center border border-[#8b6914]/40 select-none transition-colors ${
+                                (dr + dc) % 2 === 0 ? 'bg-[#e8c98a]/90' : 'bg-[#d4b06a]/90'
                               } ${isSelected ? 'ring-2 ring-[#8b2500] ring-inset' : ''} ${
                                 isHint ? 'bg-[#7cb87c]/50' : ''
                               } ${kingHere ? 'ring-2 ring-red-500 ring-inset' : ''}`}
@@ -485,19 +512,13 @@ export default function ShogiApp() {
                               {isTo && (
                                 <span className="absolute inset-0 ring-2 ring-sky-400 ring-inset pointer-events-none" />
                               )}
-                              {piece && (
-                                <span
-                                  className={`leading-none ${
-                                    piece.owner === 'gote' ? 'rotate-180' : ''
-                                  } ${piece.owner === 'sente' ? 'text-[#1a0f08]' : 'text-[#2a1810]'}`}
-                                >
-                                  {pieceLabel(piece)}
-                                </span>
-                              )}
+                              {piece && <ShogiPiece piece={piece} />}
                             </button>
                           );
                         }),
                       )}
+                        </div>
+                      </div>
                     </div>
                   </div>
 

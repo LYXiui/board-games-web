@@ -42,7 +42,7 @@ export const CAMPS = new Set(
   ].map(([r, c]) => `${r},${c}`),
 );
 
-/** 鐵路格 */
+/** 鐵路格（依維基百科陸軍棋：中央直線 + 三條橫向鐵路連接兩陣） */
 export const RAILS = new Set(
   [
     ...Array.from({ length: ROWS }, (_, r) => [r, 2]),
@@ -52,6 +52,9 @@ export const RAILS = new Set(
     [10, 0], [10, 1], [10, 2], [10, 3], [10, 4],
   ].map(([r, c]) => `${r},${c}`),
 );
+
+/** 前線／山界（中央兩橫） */
+export const FRONTLINE = new Set(['5,0', '5,1', '5,2', '5,3', '5,4', '6,0', '6,1', '6,2', '6,3', '6,4']);
 
 const RAIL_DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 

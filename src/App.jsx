@@ -64,7 +64,7 @@ export default function App() {
               : 'text-stone-500 hover:text-stone-300'
           }`}
         >
-          軍棋
+          陸軍棋
         </button>
       </nav>
       {mode === 'ezchess' && <EZChessApp />}

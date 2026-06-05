@@ -10,7 +10,16 @@ const SECTIONS = [
           將棋（しょうぎ）在 9×9 棋盤上進行，分<strong>先手（▲）</strong>與<strong>後手（△）</strong>。目標是將死對方王將（先手稱「王」、後手稱「玉」）。
         </p>
         <p className="mt-2">
-          本模組為日式將棋規則，不含 EZChess 自訂走法或文字匯入開局。含持駒打入、升變、王手／詰み、二步、打步詰、千日手、持將棋等，由系統自動判定非法手。
+          本模組為日式將棋規則，棋盤為 9×9 81 格，駒以<strong>木製五邊形</strong>漢字標示（王／玉、飛、角、金、銀、桂、香、歩）。樣式參考
+          <a
+            href="https://www.fun-japan.jp/hk/articles/9563"
+            target="_blank"
+            rel="noreferrer"
+            className="underline text-[#d4a574] hover:text-[#f5ecd7] ml-1"
+          >
+            FUN! JAPAN 将棋入門
+          </a>
+          。
         </p>
       </>
     ),

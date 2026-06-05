@@ -12,13 +12,18 @@ export const MAX_STACK = 3;
 
 export const PIECE = {
   M: { name: '帥', rank: 8 },
-  G: { name: '將', rank: 7 },
+  G: { name: '侍', rank: 7 },
   F: { name: '砦', rank: 6 },
   A: { name: '弓', rank: 5 },
   C: { name: '砲', rank: 5 },
+  T: { name: '筒', rank: 5 },
   K: { name: '馬', rank: 4 },
-  Y: { name: '諜', rank: 4 },
+  Y: { name: '忍', rank: 4 },
+  B: { name: '謀', rank: 4 },
   S: { name: '兵', rank: 3 },
+  L: { name: '小', rank: 2 },
+  N: { name: '中', rank: 2 },
+  H: { name: '大', rank: 2 },
 };
 
 export const PIECE_ZH = Object.fromEntries(

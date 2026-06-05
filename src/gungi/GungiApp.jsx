@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { findBestMove } from './ai.js';
 import GungiRulesPanel from './GungiRulesPanel.jsx';
+import GungiPiece from './GungiPiece.jsx';
 import {
   SIZE,
   defaultGame,
@@ -9,7 +10,6 @@ import {
   getGameResult,
   isMarshalThreatened,
   formatMoveBrief,
-  pieceLabel,
   PIECE_ZH,
 } from './logic.js';
 
@@ -35,7 +35,7 @@ function HandPanel({ owner, hand, selected, onSelect, disabled, label }) {
             disabled ? 'opacity-40' : 'hover:bg-[#3d5235]',
           ].join(' ')}
         >
-          {PIECE_ZH[type]}
+          <GungiPiece type={type} owner={owner} compact />
           {counts[type] > 1 && (
             <span className="ml-0.5 text-[10px] opacity-80">×{counts[type]}</span>
           )}
@@ -221,7 +221,7 @@ export default function GungiApp() {
         <header className="flex flex-wrap items-end justify-between gap-3 border-b border-[#4a5f3a] pb-4">
           <div>
             <h1 className="text-2xl font-serif font-bold text-[#e8f0dc]">軍儀</h1>
-            <p className="text-xs text-[#9ca88a]">Gungi · 9×9 · 三層疊 · 降旗</p>
+            <p className="text-xs text-[#9ca88a]">軍儀（ぐんぎ）· 9×9 · 官方規則整理 · 三層疊</p>
           </div>
           <button
             type="button"
@@ -297,10 +297,13 @@ export default function GungiApp() {
               label="△ 後手持駒"
             />
 
-            <div className="inline-block p-3 rounded-lg border-4 border-[#4a5f3a] bg-[#2a3824]">
+            <div className="inline-block p-3 rounded-lg border-4 border-[#6b5030] bg-[#3d3228] shadow-lg">
               <div
-                className="inline-grid border-2 border-[#3d5235]"
-                style={{ gridTemplateColumns: `repeat(${SIZE}, minmax(2.5rem, 1fr))` }}
+                className="inline-grid border-2 border-[#5a4a32]"
+                style={{
+                  gridTemplateColumns: `repeat(${SIZE}, minmax(2.5rem, 1fr))`,
+                  background: 'linear-gradient(180deg, #c9a86c 0%, #a08050 100%)',
+                }}
               >
                 {displayRows.map((r) =>
                   Array.from({ length: SIZE }, (_, c) => {
@@ -311,7 +314,6 @@ export default function GungiApp() {
                     const isTo = lastMark && lastMark.tr === r && lastMark.tc === c;
                     const isSel = selected?.r === r && selected?.c === c;
                     const isHint = legalTargets.has(`${r},${c}`);
-                    const isGote = top?.owner === 'gote';
 
                     return (
                       <button
@@ -321,31 +323,20 @@ export default function GungiApp() {
                         onClick={() => onCellClick(r, c)}
                         className={[
                           'relative w-11 h-14 sm:w-12 sm:h-16 flex flex-col items-center justify-end pb-1',
-                          (r + c) % 2 === 0 ? 'bg-[#3d5235]' : 'bg-[#354830]',
-                          'border border-[#4a5f3a]/50',
-                          isHint ? 'ring-2 ring-emerald-500/80 ring-inset' : '',
+                          (r + c) % 2 === 0 ? 'bg-[#d4bc82]/80' : 'bg-[#c9a86c]/80',
+                          'border border-[#8b7355]/50',
+                          isHint ? 'ring-2 ring-emerald-600/80 ring-inset' : '',
                           isFrom ? 'ring-2 ring-red-600 ring-inset' : '',
                           isTo ? 'ring-2 ring-sky-500 ring-inset' : '',
                         ].join(' ')}
                       >
-                        {h > 0 && (
-                          <span className="absolute top-0.5 right-0.5 text-[10px] text-[#9ca88a] font-mono">
-                            {h}
-                          </span>
-                        )}
                         {top && (
-                          <span
-                            className={[
-                              'w-9 h-9 flex items-center justify-center rounded-sm border-2 font-serif text-base font-bold',
-                              'bg-[#e8dcc0] text-[#1a1208] border-[#5a4a32]',
-                              isGote ? 'rotate-180' : '',
-                              isSel ? 'outline outline-2 outline-amber-400' : '',
-                              h > 1 ? 'shadow-[0_-2px_0_#8b7355,0_-4px_0_#6b5a42]' : '',
-                            ].join(' ')}
-                            style={{ marginBottom: (h - 1) * 2 }}
+                          <div
+                            className={isSel ? 'outline outline-2 outline-amber-400 rounded-sm' : ''}
+                            style={{ marginBottom: (h - 1) * 3 }}
                           >
-                            {pieceLabel(top)}
-                          </span>
+                            <GungiPiece type={top.type} owner={top.owner} height={h} />
+                          </div>
                         )}
                       </button>
                     );

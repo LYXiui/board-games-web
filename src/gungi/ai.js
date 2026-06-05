@@ -1,15 +1,22 @@
-import { getLegalMoves, applyMove, getGameResult, PIECE } from './logic.js';
+import {
+  getLegalMoves,
+  applyMove,
+  getGameResult,
+  PIECE,
+  findMarshal,
+} from './logic.js';
 
 const WIN = 500_000;
 const DEPTH = 2;
 
-function boardValue(board, side) {
+function stackValue(board, side) {
   let s = 0;
-  for (const row of board) {
-    for (const stack of row) {
+  for (let r = 0; r < board.length; r += 1) {
+    for (let c = 0; c < board[r].length; c += 1) {
+      const stack = board[r][c];
       for (let i = 0; i < stack.length; i += 1) {
         const p = stack[i];
-        const v = (PIECE[p.type].rank + i) * 10;
+        const v = (PIECE[p.type]?.value || 3) + i * 2;
         if (p.owner === side) s += v;
         else s -= v;
       }
@@ -19,7 +26,11 @@ function boardValue(board, side) {
 }
 
 function handValue(hands, side) {
-  return hands[side].reduce((sum, t) => sum + (PIECE[t].rank || 3) * 5, 0);
+  return hands[side].reduce((sum, t) => sum + (PIECE[t]?.value || 3), 0);
+}
+
+function marshalBonus(board, side) {
+  return findMarshal(board, side) ? 15 : -80;
 }
 
 function evaluate(state, aiSide) {
@@ -27,7 +38,19 @@ function evaluate(state, aiSide) {
   const result = getGameResult(state);
   if (result?.type === 'win' && result.winner === aiSide) return WIN;
   if (result?.type === 'win' && result.winner === human) return -WIN;
-  return boardValue(state.board, aiSide) + handValue(state.hands, aiSide) * 1.5;
+  if (result?.type === 'draw') return 0;
+  return (
+    stackValue(state.board, aiSide)
+    + handValue(state.hands, aiSide) * 0.8
+    + marshalBonus(state.board, aiSide)
+  );
+}
+
+function pickMoveScore(move) {
+  if (move.kind === 'capture' || move.kind === 'captureStack') return 40;
+  if (move.kind === 'strike') return 20;
+  if (move.shin) return 5;
+  return 0;
 }
 
 function alphaBeta(state, depth, alpha, beta, aiSide) {
@@ -41,6 +64,8 @@ function alphaBeta(state, depth, alpha, beta, aiSide) {
     return 0;
   }
   if (depth === 0) return evaluate(state, aiSide);
+
+  moves.sort((a, b) => pickMoveScore(b) - pickMoveScore(a));
 
   const maximizing = turn === aiSide;
   if (maximizing) {

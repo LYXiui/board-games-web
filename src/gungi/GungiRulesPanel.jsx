@@ -19,7 +19,7 @@ const SECTIONS = [
           <a href="https://forum.gamer.com.tw/C.php?bsn=1272&snA=12034" target="_blank" rel="noreferrer" className="underline hover:text-[#d4e4c8]">規則中譯</a>
         </p>
         <p className="mt-2 text-xs text-[#c9a227]">
-          本模組為<strong>中級簡化 playable 版</strong>（AI 對弈）；完整 14 種駒與「謀」等特殊效果見下方規則全文。
+          本模組已實作<strong>官方核心規則</strong>（段數制、新、三層疊、特殊駒飛越、謀、千日手）。
         </p>
       </>
     ),
@@ -143,7 +143,7 @@ const SECTIONS = [
       <ul className="list-disc pl-5 space-y-1.5 text-xs">
         <li>先捕獲敵<strong>帥</strong>者勝；或帥遭將死；或對方<strong>投降</strong>。</li>
         <li>同一局面出現<strong>四次</strong>（千日手）則重開新局。</li>
-        <li>本 playable 版含：帥・侍・兵・馬・砲・弓・忍等簡化走法、三層疊、手駒打入、降旗認輸。</li>
+        <li>本 playable 版已實作：段數制吃子／疊加、新（6 行內）、砲筒弓飛越、大中無限直線、謀回家睡覺、千日手、降旗。</li>
       </ul>
     ),
   },

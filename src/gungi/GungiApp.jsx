@@ -10,6 +10,7 @@ import {
   getGameResult,
   isMarshalThreatened,
   formatMoveBrief,
+  getMovesForTarget,
   PIECE_ZH,
 } from './logic.js';
 
@@ -60,6 +61,7 @@ export default function GungiApp() {
   const [winner, setWinner] = useState(null);
   const [endReason, setEndReason] = useState('');
   const [showRules, setShowRules] = useState(true);
+  const [moveChoice, setMoveChoice] = useState(null);
   const aiBusyRef = useRef(false);
 
   const pushLog = useCallback((line) => {
@@ -131,6 +133,7 @@ export default function GungiApp() {
   const commitMove = useCallback(
     (move) => {
       if (phase !== 'playing' || game.turn !== humanSide || aiBusyRef.current) return;
+      setMoveChoice(null);
       const next = applyMove(game, move);
       if (!move.drop) setLastMark({ fr: move.fr, fc: move.fc, tr: move.tr, tc: move.tc });
       else setLastMark({ tr: move.tr, tc: move.tc, drop: true });
@@ -142,6 +145,15 @@ export default function GungiApp() {
       if (next.turn === aiSide) runAi(next);
     },
     [phase, game, humanSide, aiSide, pushLog, resolveAfterMove, runAi],
+  );
+
+  const pickMove = useCallback(
+    (candidates) => {
+      if (!candidates.length) return;
+      if (candidates.length === 1) commitMove(candidates[0]);
+      else setMoveChoice(candidates);
+    },
+    [commitMove],
   );
 
   const startGame = useCallback(() => {
@@ -171,7 +183,7 @@ export default function GungiApp() {
     if (phase !== 'playing' || game.turn !== humanSide) return map;
     if (dropType) {
       for (const m of getLegalMoves(game, humanSide)) {
-        if (m.drop && m.type === dropType) map.set(`${m.tr},${m.tc}`, m);
+        if (m.shin && m.type === dropType) map.set(`${m.tr},${m.tc}`, m);
       }
       return map;
     }
@@ -191,15 +203,15 @@ export default function GungiApp() {
     if (phase !== 'playing' || game.turn !== humanSide) return;
     if (dropType) {
       const m = legalTargets.get(`${r},${c}`);
-      if (m) commitMove(m);
+      if (m) pickMove([m]);
       return;
     }
     const stack = game.board[r][c];
     const top = stack.length ? stack[stack.length - 1] : null;
     if (selected) {
-      const m = legalTargets.get(`${r},${c}`);
-      if (m) {
-        commitMove(m);
+      const candidates = getMovesForTarget(game, humanSide, selected.r, selected.c, r, c);
+      if (candidates.length) {
+        pickMove(candidates);
         return;
       }
       if (top && top.owner === humanSide) {
@@ -221,7 +233,7 @@ export default function GungiApp() {
         <header className="flex flex-wrap items-end justify-between gap-3 border-b border-[#4a5f3a] pb-4">
           <div>
             <h1 className="text-2xl font-serif font-bold text-[#e8f0dc]">軍儀</h1>
-            <p className="text-xs text-[#9ca88a]">軍儀（ぐんぎ）· 9×9 · 官方規則整理 · 三層疊</p>
+            <p className="text-xs text-[#9ca88a]">軍儀（ぐんぎ）· 9×9 · 官方完整規則 · 三層疊 · 新</p>
           </div>
           <button
             type="button"
@@ -272,6 +284,7 @@ export default function GungiApp() {
                     △ 後手
                   </button>
                 </div>
+                <p className="text-xs text-[#8a9a78]">持駒以「新」打入（6 行以內）；同格可選移／疊／取。</p>
                 <button
                   type="button"
                   onClick={startGame}
@@ -293,7 +306,7 @@ export default function GungiApp() {
               hand={game.hands.gote}
               selected={dropType}
               onSelect={(t) => { setDropType(t); setSelected(null); }}
-              disabled={phase !== 'playing' || game.turn !== humanSide || humanSide !== 'gote'}
+              disabled={phase !== 'playing' || game.turn !== humanSide}
               label="△ 後手持駒"
             />
 
@@ -350,8 +363,8 @@ export default function GungiApp() {
               hand={game.hands.sente}
               selected={dropType}
               onSelect={(t) => { setDropType(t); setSelected(null); }}
-              disabled={phase !== 'playing' || game.turn !== humanSide || humanSide !== 'sente'}
-              label="▲ 先手持駒"
+              disabled={phase !== 'playing' || game.turn !== humanSide}
+              label="▲ 先手持駒（新）"
             />
 
             <div className="flex flex-wrap gap-2">
@@ -403,6 +416,33 @@ export default function GungiApp() {
           )}
         </div>
       </div>
+
+      {moveChoice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="rounded-xl border border-[#5a7048] bg-[#1f2a1c] p-5 max-w-sm w-full space-y-3 shadow-xl">
+            <h3 className="font-serif text-lg text-center text-[#e8f0dc]">選擇著法</h3>
+            <div className="flex flex-col gap-2">
+              {moveChoice.map((m, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => commitMove(m)}
+                  className="px-4 py-2 rounded-lg border border-[#5a7048] hover:bg-[#243020] text-sm text-left font-serif"
+                >
+                  {formatMoveBrief(game, m)}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setMoveChoice(null)}
+              className="w-full text-xs text-[#8a9a78] hover:text-[#d4e4c8]"
+            >
+              取消
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

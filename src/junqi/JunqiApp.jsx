@@ -1,30 +1,16 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { findBestMove } from './ai.js';
 import JunqiRulesPanel from './JunqiRulesPanel.jsx';
+import JunqiBoard from './JunqiBoard.jsx';
+import JunqiPiece from './JunqiPiece.jsx';
 import {
   ROWS,
-  COLS,
   defaultGame,
   getLegalMoves,
   applyMove,
   getGameResult,
   formatMoveBrief,
-  pieceName,
-  CAMPS,
-  RAILS,
-  HQ,
-  FRONTLINE,
 } from './logic.js';
-
-function cellKind(r, c) {
-  if (HQ.red.some(([hr, hc]) => hr === r && hc === c) || HQ.blue.some(([hr, hc]) => hr === r && hc === c)) {
-    return 'hq';
-  }
-  if (CAMPS.has(`${r},${c}`)) return 'camp';
-  if (FRONTLINE.has(`${r},${c}`)) return 'front';
-  if (RAILS.has(`${r},${c}`)) return 'rail';
-  return 'normal';
-}
 
 export default function JunqiApp() {
   const [phase, setPhase] = useState('lobby');
@@ -144,25 +130,7 @@ export default function JunqiApp() {
 
   const displayRows = flipped ? [...Array(ROWS).keys()] : [...Array(ROWS).keys()].reverse();
 
-  const renderPiece = (piece) => {
-    if (!piece) return null;
-    const isHuman = piece.owner === humanColor;
-    const show = isHuman || piece.revealed;
-    return (
-      <span
-        className={[
-          'w-7 h-9 sm:w-8 sm:h-10 flex items-center justify-center rounded-sm text-[9px] sm:text-[10px] font-bold border leading-tight text-center writing-vertical',
-          piece.owner === 'red'
-            ? 'bg-red-800 border-red-500 text-red-50'
-            : 'bg-blue-800 border-blue-400 text-blue-50',
-          !show ? 'bg-stone-600 border-stone-500 text-stone-300 shadow-inner' : 'shadow-md',
-        ].join(' ')}
-        style={{ writingMode: show ? 'vertical-rl' : undefined }}
-      >
-        {show ? pieceName(piece.type) : '？'}
-      </span>
-    );
-  };
+  const pieceRevealed = (piece) => piece && (piece.owner === humanColor || piece.revealed);
 
   const onCellClick = (r, c) => {
     if (phase !== 'playing' || game.turn !== humanColor) return;
@@ -258,22 +226,9 @@ export default function JunqiApp() {
               </div>
             )}
 
-            <div className="inline-block p-2 rounded-lg border-4 border-[#5c3d1e] bg-[#3d2817] shadow-lg">
-              <div className="flex gap-1 items-stretch">
-                <div className="flex flex-col justify-around py-6 text-[10px] text-[#a08060] font-serif pr-0.5">
-                  {displayRows.map((r) => (
-                    <span key={r} className="h-11 sm:h-12 flex items-center justify-center">
-                      {FRONTLINE.has(`${r},2`) ? '界' : ''}
-                    </span>
-                  ))}
-                </div>
-                <div
-                  className="inline-grid gap-px bg-[#3d2817]"
-                  style={{ gridTemplateColumns: `repeat(${COLS}, minmax(2.75rem, 1fr))` }}
-                >
+            <JunqiBoard displayRows={displayRows}>
                 {displayRows.map((r) =>
-                  Array.from({ length: COLS }, (_, c) => {
-                    const kind = cellKind(r, c);
+                  Array.from({ length: 5 }, (_, c) => {
                     const piece = game.board[r][c];
                     const isFrom = lastMark && lastMark.fr === r && lastMark.fc === c;
                     const isTo = lastMark && lastMark.tr === r && lastMark.tc === c;
@@ -287,32 +242,28 @@ export default function JunqiApp() {
                         disabled={phase === 'lobby' || phase === 'ended' || phase === 'thinking'}
                         onClick={() => onCellClick(r, c)}
                         className={[
-                          'relative w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center',
-                          kind === 'rail' ? 'bg-[#4a4540]' : kind === 'camp' ? 'bg-[#2d4a2d]' : kind === 'front' ? 'bg-[#5a5048]' : 'bg-[#6b5a45]',
-                          kind === 'hq' ? 'bg-[#2a1810] ring-1 ring-inset ring-amber-700/90' : '',
-                          kind === 'camp' ? 'rounded-full' : '',
-                          kind === 'front' ? 'border-y border-dashed border-[#8b6914]/40' : '',
-                          isHint ? 'ring-2 ring-emerald-500 ring-inset' : '',
-                          isFrom ? 'ring-2 ring-red-600 ring-inset' : '',
-                          isTo ? 'ring-2 ring-sky-500 ring-inset' : '',
-                          isSel ? 'outline outline-2 outline-amber-400' : '',
+                          'relative w-full h-full min-h-0 flex items-center justify-center bg-transparent',
+                          isHint ? 'ring-2 ring-emerald-500 ring-inset z-[2]' : '',
+                          isFrom ? 'ring-2 ring-red-500 ring-inset z-[2]' : '',
+                          isTo ? 'ring-2 ring-sky-500 ring-inset z-[2]' : '',
+                          isSel ? 'outline outline-2 outline-amber-500 z-[2]' : '',
                         ].join(' ')}
                       >
-                        {renderPiece(piece)}
+                        {piece && (
+                          <JunqiPiece piece={piece} revealed={pieceRevealed(piece)} />
+                        )}
                       </button>
                     );
                   }),
                 )}
-                </div>
-              </div>
-            </div>
+              </JunqiBoard>
 
             <div className="flex flex-wrap gap-x-4 text-xs text-[#c4a574]">
-              <span>■ 鐵路</span>
-              <span>● 行營</span>
-              <span>▣ 大本營</span>
-              <span>— 山界（前線）</span>
-              <span>？ 未翻開敵子</span>
+              <span>虛線粗線＝鐵路</span>
+              <span>細實線＝公路</span>
+              <span>○ 行營</span>
+              <span>■ 大本營</span>
+              <span>◎ 山界</span>
             </div>
 
             <div className="flex flex-wrap gap-2">

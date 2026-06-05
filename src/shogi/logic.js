@@ -23,11 +23,36 @@ export const PIECE_KANJI = {
   '+P': 'と',
 };
 
+/** 棋盤上顯示的完整駒名（對照實物將棋） */
+export const PIECE_FULL = {
+  K: { sente: '玉将', gote: '王将' },
+  R: '飛車',
+  B: '角行',
+  G: '金将',
+  S: '銀将',
+  N: '桂馬',
+  L: '香車',
+  P: '歩兵',
+  '+R': '龍王',
+  '+B': '龍馬',
+  '+S': '成銀',
+  '+N': '成桂',
+  '+L': '成香',
+  '+P': 'と金',
+};
+
 export function pieceLabel(piece) {
   if (!piece) return '';
   const key = piece.promoted ? `+${piece.type}` : piece.type;
   if (piece.type === 'K') return PIECE_KANJI.K[piece.owner];
   return PIECE_KANJI[key] || key;
+}
+
+export function pieceDisplayLabel(piece) {
+  if (!piece) return '';
+  const key = piece.promoted ? `+${piece.type}` : piece.type;
+  if (piece.type === 'K') return PIECE_FULL.K[piece.owner];
+  return PIECE_FULL[key] || pieceLabel(piece);
 }
 
 export function emptyBoard() {

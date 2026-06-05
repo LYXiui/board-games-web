@@ -13,10 +13,8 @@ import {
 } from './logic.js';
 import { findBestMove } from './ai.js';
 import ShogiRulesPanel from './ShogiRulesPanel.jsx';
-import ShogiPiece from './ShogiPiece.jsx';
-
-const FILE_NUM = ['9', '8', '7', '6', '5', '4', '3', '2', '1'];
-const RANK_KANJI = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
+import ShogiBoard from './ShogiBoard.jsx';
+import ShogiKomadai from './ShogiKomadai.jsx';
 
 function sameMove(a, b) {
   if (!!a.drop !== !!b.drop) return false;
@@ -27,42 +25,6 @@ function sameMove(a, b) {
     && a.tr === b.tr
     && a.tc === b.tc
     && !!a.promote === !!b.promote
-  );
-}
-
-function Komadai({ owner, hands, selectedType, onSelect, disabled }) {
-  const hand = hands[owner] || [];
-  const counts = {};
-  for (const t of hand) counts[t] = (counts[t] || 0) + 1;
-  const types = Object.keys(counts).sort();
-
-  if (types.length === 0) {
-    return <div className="text-xs text-[#8b6914] italic">持駒なし</div>;
-  }
-
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {types.map((type) => (
-        <button
-          key={type}
-          type="button"
-          disabled={disabled}
-          onClick={() => onSelect(selectedType === type ? null : type)}
-          className={`relative min-w-[2.5rem] h-10 px-0.5 rounded border transition-colors flex items-center justify-center ${
-            selectedType === type
-              ? 'bg-[#8b2500]/40 border-[#c44] ring-2 ring-[#c44]/60'
-              : 'bg-[#c9a66b]/30 border-[#6b4423] hover:bg-[#c9a66b]/50'
-          } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
-        >
-          <ShogiPiece piece={{ type, owner, promoted: false }} size="sm" />
-          {counts[type] > 1 && (
-            <span className="absolute -top-1 -right-1 text-[10px] bg-[#8b2500] text-white rounded-full w-4 h-4 flex items-center justify-center">
-              {counts[type]}
-            </span>
-          )}
-        </button>
-      ))}
-    </div>
   );
 }
 
@@ -442,107 +404,38 @@ export default function ShogiApp() {
                   </div>
                 )}
 
-                <div className="flex flex-col sm:flex-row gap-3 items-start">
-                  <div className="order-2 sm:order-1 flex-1 w-full max-w-[min(100%,30rem)] mx-auto">
-                    <div className="inline-block p-2 rounded-lg bg-[#5c3d1e] border-2 border-[#4a3020] shadow-xl">
-                      <div
-                        className="grid gap-0 mb-1"
-                        style={{ gridTemplateColumns: '1.25rem repeat(9, 1fr)' }}
-                      >
-                        <span />
-                        {FILE_NUM.map((n) => (
-                          <span key={n} className="text-center text-[10px] text-[#8b6914] font-serif">
-                            {n}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex gap-0">
-                        <div className="flex flex-col w-5 shrink-0">
-                          {Array.from({ length: SIZE }, (_, i) => (
-                            <span
-                              key={i}
-                              className="aspect-square flex items-center justify-center text-[10px] text-[#8b6914] font-serif"
-                            >
-                              {RANK_KANJI[boardFlipped ? SIZE - 1 - i : i]}
-                            </span>
-                          ))}
-                        </div>
-                        <div
-                          className="inline-grid gap-0 border-4 border-[#5c3d1e] rounded shadow-inner flex-1"
-                          style={{
-                            gridTemplateColumns: `repeat(${SIZE}, minmax(0, 1fr))`,
-                            background: 'linear-gradient(135deg, #d4b06a 0%, #c9a66b 50%, #b8956a 100%)',
-                          }}
-                        >
-                      {Array.from({ length: SIZE }, (_, dr) =>
-                        Array.from({ length: SIZE }, (_, dc) => {
-                          const r = boardFlipped ? SIZE - 1 - dr : dr;
-                          const c = dc;
-                          const piece = board[r][c];
-                          const isFrom =
-                            lastMove
-                            && !lastMove.drop
-                            && lastMove.fr === r
-                            && lastMove.fc === c;
-                          const isTo =
-                            lastMove
-                            && lastMove.tr === r
-                            && lastMove.tc === c;
-                          const isSelected = selected?.r === r && selected?.c === c;
-                          const isHint = legalTargets.has(`${r},${c}`);
-                          const kingHere =
-                            piece?.type === 'K'
-                            && inCheckSide === piece.owner;
-
-                          return (
-                            <button
-                              key={`${r}-${c}`}
-                              type="button"
-                              onClick={() => handleCellClick(dr, dc)}
-                              disabled={phase === 'ended' || phase === 'thinking'}
-                              className={`relative aspect-square flex items-center justify-center border border-[#8b6914]/40 select-none transition-colors ${
-                                (dr + dc) % 2 === 0 ? 'bg-[#e8c98a]/90' : 'bg-[#d4b06a]/90'
-                              } ${isSelected ? 'ring-2 ring-[#8b2500] ring-inset' : ''} ${
-                                isHint ? 'bg-[#7cb87c]/50' : ''
-                              } ${kingHere ? 'ring-2 ring-red-500 ring-inset' : ''}`}
-                            >
-                              {isFrom && (
-                                <span className="absolute inset-0 ring-2 ring-red-500 ring-inset pointer-events-none" />
-                              )}
-                              {isTo && (
-                                <span className="absolute inset-0 ring-2 ring-sky-400 ring-inset pointer-events-none" />
-                              )}
-                              {piece && <ShogiPiece piece={piece} />}
-                            </button>
-                          );
-                        }),
-                      )}
-                        </div>
-                      </div>
-                    </div>
+                <div className="flex flex-col lg:flex-row gap-4 items-start">
+                  <div className="order-2 lg:order-1 flex-1 w-full min-w-0 overflow-x-auto">
+                    <ShogiBoard
+                      size={SIZE}
+                      boardFlipped={boardFlipped}
+                      board={board}
+                      phase={phase}
+                      lastMove={lastMove}
+                      selected={selected}
+                      legalTargets={legalTargets}
+                      inCheckSide={inCheckSide}
+                      onCellClick={handleCellClick}
+                    />
                   </div>
 
-                  <div className="order-1 sm:order-2 w-full sm:w-48 space-y-3 shrink-0">
-                    <div className="rounded-lg border border-[#6b4423] bg-[#3d2817]/80 p-3">
-                      <div className="text-xs text-[#8b6914] mb-1">△ 後手持駒</div>
-                      <Komadai
-                        owner="gote"
-                        hands={hands}
-                        selectedType={turn === 'gote' && humanSide === 'gote' ? dropType : null}
-                        onSelect={turn === 'gote' && humanSide === 'gote' ? setDropType : () => {}}
-                        disabled={phase !== 'playing' || turn !== 'gote' || humanSide !== 'gote'}
-                      />
-                    </div>
-                    <div className="rounded-lg border border-[#6b4423] bg-[#3d2817]/80 p-3">
-                      <div className="text-xs text-[#8b6914] mb-1">▲ 先手持駒</div>
-                      <Komadai
-                        owner="sente"
-                        hands={hands}
-                        selectedType={turn === 'sente' && humanSide === 'sente' ? dropType : null}
-                        onSelect={turn === 'sente' && humanSide === 'sente' ? setDropType : () => {}}
-                        disabled={phase !== 'playing' || turn !== 'sente' || humanSide !== 'sente'}
-                      />
-                    </div>
+                  <div className="order-1 lg:order-2 w-full lg:w-56 space-y-3 shrink-0">
+                    <ShogiKomadai
+                      label="△ 後手持駒"
+                      owner="gote"
+                      hands={hands}
+                      selectedType={turn === 'gote' && humanSide === 'gote' ? dropType : null}
+                      onSelect={turn === 'gote' && humanSide === 'gote' ? setDropType : () => {}}
+                      disabled={phase !== 'playing' || turn !== 'gote' || humanSide !== 'gote'}
+                    />
+                    <ShogiKomadai
+                      label="▲ 先手持駒"
+                      owner="sente"
+                      hands={hands}
+                      selectedType={turn === 'sente' && humanSide === 'sente' ? dropType : null}
+                      onSelect={turn === 'sente' && humanSide === 'sente' ? setDropType : () => {}}
+                      disabled={phase !== 'playing' || turn !== 'sente' || humanSide !== 'sente'}
+                    />
                     {lastResponse && (
                       <div className="rounded-lg border border-[#6b4423] bg-[#2a1810]/60 p-3 text-sm">
                         <div className="text-[#8b6914] text-xs mb-1">對方著法</div>

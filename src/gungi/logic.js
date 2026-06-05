@@ -1,6 +1,6 @@
 /**
  * 軍儀（Gungi）官方規則引擎
- * 參考：官方解說書、巴哈姆特 #11918 / #12034 中譯
+ * 參考：Hunter Wiki、UMS 官方 Q&A、docs/GUNGI.md
  * 9×9 · 14 種駒 · 各 25 枚 · 三層疊 · 新 · 段數制（非棋子強弱）
  */
 
@@ -9,7 +9,7 @@ export const MAX_STACK = 3;
 export const SHIN_ROWS = 6;
 
 /** @typedef {'sente'|'gote'} Side */
-/** @typedef {'M'|'G'|'S'|'K'|'Y'|'L'|'N'|'H'|'A'|'C'|'T'|'B'} PieceType */
+/** @typedef {'M'|'G'|'S'|'K'|'Y'|'L'|'N'|'H'|'F'|'A'|'C'|'T'|'B'} PieceType */
 /** @typedef {{ type: PieceType, owner: Side }} Piece */
 
 export const PIECE = {
@@ -21,6 +21,7 @@ export const PIECE = {
   L: { name: '小', value: 4 },
   N: { name: '中', value: 7 },
   H: { name: '大', value: 9 },
+  F: { name: '砦', value: 5 },
   A: { name: '弓', value: 6 },
   C: { name: '砲', value: 6 },
   T: { name: '筒', value: 6 },
@@ -34,12 +35,12 @@ export const PIECE_ZH = Object.fromEntries(
 /** 各方 25 枚（12 種常用配置；解說書共 14 種名稱） */
 export const FULL_SET = [
   'M',
-  'G', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S',
+  'G', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S',
   'K', 'K',
   'Y', 'Y', 'Y',
   'L', 'L',
   'N', 'N',
-  'H',
+  'H', 'F',
   'A', 'C', 'T', 'B',
 ];
 
@@ -264,6 +265,14 @@ function moveTargets(board, r, c, side) {
 
   if (t === 'B') {
     for (const [dr, dc] of KING_DIRS) add([r + dr, c + dc]);
+    return [...targets].map((k) => k.split(',').map(Number));
+  }
+
+  if (t === 'F') {
+    if (h === 1) return [];
+    for (const [dr, dc] of ORTHO) {
+      for (let i = 1; i <= 1 + bonus; i += 1) add([r + dr * i, c + dc * i]);
+    }
     return [...targets].map((k) => k.split(',').map(Number));
   }
 

@@ -9,8 +9,8 @@
 | EZChess | `src/ezchess/` | 課程規則 8×8、AB/UV、開局匯入、UV 調整 |
 | 西洋棋 | `src/chess/` | 標準規則（易位、過路兵、升變） |
 | 将棋 | `src/shogi/` | 日式完整規則（打入、升變、千日手等） |
-| 軍儀 | `src/gungi/` | **原創** 9×9 三層疊、階級制、降旗 |
-| 軍棋 | `src/junqi/` | 陸戰棋 12×5、暗棋、鐵路、行營、奪旗 |
+| 軍儀 | `src/gungi/` | 《獵人》軍儀 9×9 官方規則（[完整說明](docs/GUNGI.md)） |
+| 陸軍棋 | `src/junqi/` | 陸戰棋 12×5、暗棋、鐵路、行營、奪旗 |
 
 各模組互不混入他棋規則。
 
@@ -42,9 +42,13 @@ src/
   ezchess/
   chess/
   shogi/
-  gungi/            # 軍儀（原創）
-  junqi/            # 軍棋（陸戰棋）
+  gungi/            # 軍儀（Gungi）
+  junqi/            # 陸軍棋
 ```
+
+## 軍儀完整規則
+
+見 **[docs/GUNGI.md](docs/GUNGI.md)**（含 [Hunter Wiki 軍儀棋](https://hunterxhunter.fandom.com/zh/wiki/軍儀棋) 連結、棋子表、UMS 官方 Q&A）。
 
 ## 上傳 GitHub
 
@@ -70,4 +74,4 @@ MIT License — 見 [LICENSE](LICENSE)
 
 ## 免責聲明
 
-軍儀模組為教學用原創簡化規則，靈感來自虛構作品中的棋戲概念，非官方完整軍儀規則複製。
+軍儀為《獵人》虛構棋戲；本專案為非官方 fan 實作，規則整理自 Wiki 與 UMS 解說書。角色 © 冨樫義博。
